@@ -38,6 +38,10 @@
     playerRect.ctx.fillRect(0, 0, 35, 150);
 
     player1 = game.add.sprite(40, 240, playerRect);
+    game.physics.arcade.enable(player1);
+    player1.body.bounce.y = 0.2;
+    player1.body.gravity.y = -300;
+    player1.body.collideWorldBounds = true;
   }
 
   function update() {
