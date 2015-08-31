@@ -11,9 +11,9 @@
   var game = new Phaser.Game(800, 400, Phaser.AUTO, '', {preload: preload,
                                               create: create, update: update});
 
-  var boundaries;
-  var player1, player2;
-  var player1Life = 100, player2Life = 100, player1Air = 100, player2Aire = 100;
+  var boundaries, bars;
+  var player1, player2, p1LifeBar, p2LifeBar, p1AirBar, p2AirBar;
+  var player1Life = 100, player2Life = 100, player1Air = 100, player2Air = 100;
 
   function processInput(player, keys) {
     player.body.velocity.x = 0;
@@ -46,7 +46,7 @@
     vertBoundaries.ctx.fillStyle = "#ff0000";
     vertBoundaries.ctx.fillRect(0, 0, 800, 10);
 
-    var top = boundaries.create(0, 0, vertBoundaries, 0)
+    var top = boundaries.create(0, 30, vertBoundaries, 0)
     top.body.immovable = true;
     var bottom = boundaries.create(0, 390, vertBoundaries, 0);
     bottom.body.immovable = true;
@@ -55,9 +55,9 @@
     horBoundaries.ctx.fillStyle = "#ff0000";
     horBoundaries.ctx.fillRect(0, 0, 10, 390);
 
-    var left = boundaries.create(0, 10, horBoundaries, 0);
+    var left = boundaries.create(0, 30, horBoundaries, 0);
     left.body.immovable = true;
-    var right = boundaries.create(790, 10, horBoundaries, 0);
+    var right = boundaries.create(790, 30, horBoundaries, 0);
     right.body.immovable = true;
 
     var playerRect = game.make.bitmapData(35, 150);
@@ -69,10 +69,26 @@
     player1.body.bounce.y = 0.2;
     player1.body.gravity.y = 300;
 
-    player2 = game.add.sprite(600, 10, playerRect);
+    player2 = game.add.sprite(600, 40, playerRect);
     game.physics.arcade.enable(player2);
     player2.body.bounce.y = 0.2;
     player2.body.gravity.y = -300;
+
+    var lifeBar = game.make.bitmapData(200, 10);
+    lifeBar.ctx.fillStyle = "#d2b48c";
+    lifeBar.ctx.fillRect(0, 0, 200, 10);
+
+    var airBar = game.make.bitmapData(200, 10);
+    airBar.ctx.fillStyle = "#b0d7e6";
+    airBar.ctx.fillRect(0, 0, 200, 10);
+
+    bars = game.add.group();
+
+    player1LifeBar = bars.create(10, 0, lifeBar, 0);
+    player1AirBar = bars.create(10, 10, airBar, 0);
+    player2LifeBar = bars.create(550, 0, lifeBar, 0);
+    player2AirBar = bars.create(550, 10, airBar, 0);
+
   }
 
   function update() {
@@ -91,6 +107,13 @@
     processInput(player1, p1Controls);
     processInput(player2, p2Controls);
 
+    player1Air -= 0.05;
+    player2Air -= 0.05;
+    player1AirBar.scale.set(player1Air / 100, 1);
+    player2AirBar.scale.set(player2Air / 100, 1);
+
+    player1LifeBar.scale.set(player1Life / 100, 1);
+    player2LifeBar.scale.set(player2Life / 100, 1);
   }
 
   </script>
