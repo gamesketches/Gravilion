@@ -14,6 +14,18 @@
   var boundaries;
   var player1, player2;
   var player1Life = 100, player2Life = 100, player1Air = 100, player2Aire = 100;
+
+  function processInput(player, keys) {
+    player.body.velocity.x = 0;
+
+    if(keys.left.isDown) {
+      player.body.velocity.x = -100;
+    }
+    else if(keys.right.isDown) {
+      player.body.velocity.x = 100;
+    }
+  }
+
   function preload() {
     console.log("more like proload mirite");
   }
@@ -71,20 +83,9 @@
       right: game.input.keyboard.addKey(Phaser.Keyboard.D),
     }
 
-    player1.body.velocity.x = 0;
-    player2.body.velocity.x = 0;
-    if(p1Controls.left.isDown) {
-      player1.body.velocity.x = -100;
-    }
-    else if(p1Controls.right.isDown) {
-      player1.body.velocity.x = 100;
-    }
-    if(p2Controls.left.isDown) {
-      player2.body.velocity.x = -100;
-    }
-    else if(p2Controls.right.isDown) {
-      player2.body.velocity.x = 100;
-    }
+    processInput(player1, p1Controls);
+    processInput(player2, p2Controls);
+    
   }
 
   </script>
