@@ -11,7 +11,7 @@
   var game = new Phaser.Game(800, 400, Phaser.AUTO, '', {preload: preload,
                                               create: create, update: update});
 
-  var top, bottom, left, right;
+  var boundaries;
   var player1, player2;
   var player1Life = 100, player2Life = 100, player1Air = 100, player2Aire = 100;
   function preload() {
@@ -19,19 +19,29 @@
   }
 
   function create() {
+
+    game.physics.startSystem(Phaser.Physics.ARCADE);
+
+    boundaries = game.add.group();
+    boundaries.enableBody = true;
+
     var vertBoundaries = game.make.bitmapData(800, 10);
     vertBoundaries.ctx.fillStyle = "#ff0000";
     vertBoundaries.ctx.fillRect(0, 0, 800, 10);
 
-    top = game.add.sprite(0, 0, vertBoundaries);
-    bottom = game.add.sprite(0, 390, vertBoundaries);
+    var top = boundaries.create(0, 0, vertBoundaries, 0)
+    top.body.immovable = true;
+    var bottom = boundaries.create(0, 390, vertBoundaries, 0);
+    bottom.body.immovable = true;
 
     var horBoundaries = game.make.bitmapData(10, 380);
     horBoundaries.ctx.fillStyle = "#ff0000";
     horBoundaries.ctx.fillRect(0, 0, 10, 390);
 
-    left = game.add.sprite(0, 10, horBoundaries);
-    right = game.add.sprite(790, 10, horBoundaries);
+    var left = boundaries.create(0, 10, horBoundaries, 0);
+    left.body.immovable = true;
+    var right = boundaries.create(790, 10, horBoundaries, 0);
+    right.body.immovable = true;
 
     var playerRect = game.make.bitmapData(35, 150);
     playerRect.ctx.fillStyle = "#00FF00";
@@ -45,7 +55,7 @@
   }
 
   function update() {
-    console.log("barf");
+    game.physics.arcade.collide(player1, boundaries);
   }
 
   </script>
