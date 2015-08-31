@@ -50,12 +50,17 @@
     player1 = game.add.sprite(40, 240, playerRect);
     game.physics.arcade.enable(player1);
     player1.body.bounce.y = 0.2;
-    player1.body.gravity.y = -300;
-    player1.body.collideWorldBounds = true;
+    player1.body.gravity.y = 300;
+
+    player2 = game.add.sprite(600, 10, playerRect);
+    game.physics.arcade.enable(player2);
+    player2.body.bounce.y = 0.2;
+    player2.body.gravity.y = -300;
   }
 
   function update() {
     game.physics.arcade.collide(player1, boundaries);
+    game.physics.arcade.collide(player2, boundaries);
   }
 
   </script>
