@@ -24,6 +24,11 @@
     else if(keys.right.isDown) {
       player.body.velocity.x = 100;
     }
+
+    if((keys.up.isDown && player.body.gravity.y > 0) ||
+        (keys.down.isDown && player.body.gravity.y < 0)) {
+      player.body.gravity.y *= -1;
+    }
   }
 
   function preload() {
@@ -85,7 +90,7 @@
 
     processInput(player1, p1Controls);
     processInput(player2, p2Controls);
-    
+
   }
 
   </script>
