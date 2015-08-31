@@ -61,6 +61,30 @@
   function update() {
     game.physics.arcade.collide(player1, boundaries);
     game.physics.arcade.collide(player2, boundaries);
+
+    var p2Controls = game.input.keyboard.createCursorKeys();
+
+    var p1Controls = {
+      up: game.input.keyboard.addKey(Phaser.Keyboard.W),
+      down: game.input.keyboard.addKey(Phaser.Keyboard.S),
+      left: game.input.keyboard.addKey(Phaser.Keyboard.A),
+      right: game.input.keyboard.addKey(Phaser.Keyboard.D),
+    }
+
+    player1.body.velocity.x = 0;
+    player2.body.velocity.x = 0;
+    if(p1Controls.left.isDown) {
+      player1.body.velocity.x = -100;
+    }
+    else if(p1Controls.right.isDown) {
+      player1.body.velocity.x = 100;
+    }
+    if(p2Controls.left.isDown) {
+      player2.body.velocity.x = -100;
+    }
+    else if(p2Controls.right.isDown) {
+      player2.body.velocity.x = 100;
+    }
   }
 
   </script>
