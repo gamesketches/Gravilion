@@ -13,7 +13,8 @@
 
   var boundaries, bars;
   var player1, player2, p1LifeBar, p2LifeBar, p1AirBar, p2AirBar;
-  var player1Life = 100, player2Life = 100, player1Air = 100, player2Air = 100;
+  var player1Life = 100, player2Life = 100, player1Air = 100, player2Air = 100,
+  player1Rounds = 0, player2Rounds = 0;
 
   function processInput(player, keys) {
     player.body.velocity.x = 0;
@@ -32,7 +33,10 @@
   }
 
   function preload() {
-    console.log("more like proload mirite");
+    player1Life = 100;
+    player2Life = 100;
+    player1Air = 100;
+    player2Air = 100;
   }
 
   function create() {
@@ -108,13 +112,44 @@
     processInput(player2, p2Controls);
 
     player1Air -= 0.05;
+    if(player1Air < 0) {
+      game.state.start('p2Wins');
+    }
     player2Air -= 0.05;
+    if(player2Air < 0) {
+      game.state.start('p1Wins');
+    }
     player1AirBar.scale.set(player1Air / 100, 1);
     player2AirBar.scale.set(player2Air / 100, 1);
 
     player1LifeBar.scale.set(player1Life / 100, 1);
     player2LifeBar.scale.set(player2Life / 100, 1);
   }
+
+  game.state.add('fight', { preload: preload, create: create, update: update});
+
+  game.state.add('p1Wins', {
+  			preload: function() {},
+  			create: function (){
+  							game.add.text(400, 300, 'Player 1 Wins', { fontSize: '32px', fill: '#FFF' });
+  						  player1Rounds += 1;
+                if(player1Rounds < 2){
+                game.time.events.add(Phaser.Timer.SECOND * 2, function() {game.state.start('fight')}, this);
+                }
+              },
+  			update: function() {}
+  		});
+  game.state.add('p2Wins', {
+  	preload: function() {},
+  	create: function (){
+  					game.add.text(400, 300, 'Player 2 Wins', { fontSize: '32px', fill: '#FFF' });
+  				  player2Rounds += 1;
+            if(player2Rounds < 2) {
+                  game.time.events.add(Phaser.Timer.SECOND * 2, function() { game.state.start('fight')}, this);
+            }
+          },
+  	update: function() {}
+  });
 
   </script>
 </body>
