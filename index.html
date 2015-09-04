@@ -12,8 +12,10 @@
                                               create: create, update: update});
 
   var boundaries, bars;
-  var player1 = { lifeBar: null, airBar: null, life: 100, air: 100, sprite: null, rounds: 0};
-  var player2 = { lifeBar: null, airBar: null, life: 100, air: 100, sprite: null, rounds: 0};
+  var player1 = { lifeBar: null, airBar: null, life: 100, air: 100, sprite: null,
+                    rounds: 0, swordHitBox: null};
+  var player2 = { lifeBar: null, airBar: null, life: 100, air: 100, sprite: null,
+                    rounds: 0, swordHitBox: null};
 
   function processInput(player, keys) {
     player.body.velocity.x = 0;
@@ -36,6 +38,7 @@
     player2.life = 100;
     player1.air = 100;
     player2.air = 100;
+    game.load.image('sword', 'sword.png');
   }
 
   function create() {
@@ -91,6 +94,17 @@
     player1.airBar = bars.create(10, 10, airBar, 0);
     player2.lifeBar = bars.create(550, 0, lifeBar, 0);
     player2.airBar = bars.create(550, 10, airBar, 0);
+
+    player1.hitBox = game.add.sprite(0, 0, "sword");
+    player2.hitBox = game.add.sprite(0, 0, "sword");
+
+    game.physics.enable(player1.hitBox, Phaser.Physics.ARCADE);
+    game.physics.enable(player2.hitBox, Phaser.Physics.ARCADE);;
+
+    player1.sprite.addChild(player1.hitBox);
+    player2.sprite.addChild(player2.hitBox);
+    player1.hitBox.body.setSize(30, 10, player1.sprite.width, player1.sprite.height / 2);
+    player2.hitBox.body.setSize(30, 10, -31, player2.sprite.height / 2);
 
   }
 
