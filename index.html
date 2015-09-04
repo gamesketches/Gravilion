@@ -12,9 +12,8 @@
                                               create: create, update: update});
 
   var boundaries, bars;
-  var player1, player2, p1LifeBar, p2LifeBar, p1AirBar, p2AirBar;
-  var player1Life = 100, player2Life = 100, player1Air = 100, player2Air = 100,
-  player1Rounds = 0, player2Rounds = 0;
+  var player1 = { lifeBar: null, airBar: null, life: 100, air: 100, sprite: null, rounds: 0};
+  var player2 = { lifeBar: null, airBar: null, life: 100, air: 100, sprite: null, rounds: 0};
 
   function processInput(player, keys) {
     player.body.velocity.x = 0;
@@ -33,10 +32,10 @@
   }
 
   function preload() {
-    player1Life = 100;
-    player2Life = 100;
-    player1Air = 100;
-    player2Air = 100;
+    player1.life = 100;
+    player2.life = 100;
+    player1.air = 100;
+    player2.air = 100;
   }
 
   function create() {
@@ -68,15 +67,15 @@
     playerRect.ctx.fillStyle = "#00FF00";
     playerRect.ctx.fillRect(0, 0, 35, 150);
 
-    player1 = game.add.sprite(40, 240, playerRect);
-    game.physics.arcade.enable(player1);
-    player1.body.bounce.y = 0.2;
-    player1.body.gravity.y = 300;
+    player1.sprite = game.add.sprite(40, 240, playerRect);
+    game.physics.arcade.enable(player1.sprite);
+    player1.sprite.body.bounce.y = 0.2;
+    player1.sprite.body.gravity.y = 300;
 
-    player2 = game.add.sprite(600, 40, playerRect);
-    game.physics.arcade.enable(player2);
-    player2.body.bounce.y = 0.2;
-    player2.body.gravity.y = -300;
+    player2.sprite = game.add.sprite(600, 40, playerRect);
+    game.physics.arcade.enable(player2.sprite);
+    player2.sprite.body.bounce.y = 0.2;
+    player2.sprite.body.gravity.y = -300;
 
     var lifeBar = game.make.bitmapData(200, 10);
     lifeBar.ctx.fillStyle = "#d2b48c";
@@ -88,16 +87,16 @@
 
     bars = game.add.group();
 
-    player1LifeBar = bars.create(10, 0, lifeBar, 0);
-    player1AirBar = bars.create(10, 10, airBar, 0);
-    player2LifeBar = bars.create(550, 0, lifeBar, 0);
-    player2AirBar = bars.create(550, 10, airBar, 0);
+    player1.lifeBar = bars.create(10, 0, lifeBar, 0);
+    player1.airBar = bars.create(10, 10, airBar, 0);
+    player2.lifeBar = bars.create(550, 0, lifeBar, 0);
+    player2.airBar = bars.create(550, 10, airBar, 0);
 
   }
 
   function update() {
-    game.physics.arcade.collide(player1, boundaries);
-    game.physics.arcade.collide(player2, boundaries);
+    game.physics.arcade.collide(player1.sprite, boundaries);
+    game.physics.arcade.collide(player2.sprite, boundaries);
 
     var p2Controls = game.input.keyboard.createCursorKeys();
 
@@ -108,22 +107,22 @@
       right: game.input.keyboard.addKey(Phaser.Keyboard.D),
     }
 
-    processInput(player1, p1Controls);
-    processInput(player2, p2Controls);
+    processInput(player1.sprite, p1Controls);
+    processInput(player2.sprite, p2Controls);
 
-    player1Air -= 0.05;
-    if(player1Air < 0) {
+    player1.air -= 0.05;
+    if(player1.air < 0) {
       game.state.start('p2Wins');
     }
-    player2Air -= 0.05;
-    if(player2Air < 0) {
+    player2.air -= 0.05;
+    if(player2.air < 0) {
       game.state.start('p1Wins');
     }
-    player1AirBar.scale.set(player1Air / 100, 1);
-    player2AirBar.scale.set(player2Air / 100, 1);
+    player1.airBar.scale.set(player1.air / 100, 1);
+    player2.airBar.scale.set(player2.air / 100, 1);
 
-    player1LifeBar.scale.set(player1Life / 100, 1);
-    player2LifeBar.scale.set(player2Life / 100, 1);
+    player1.lifeBar.scale.set(player1.life / 100, 1);
+    player2.lifeBar.scale.set(player2.life / 100, 1);
   }
 
   game.state.add('fight', { preload: preload, create: create, update: update});
@@ -132,8 +131,8 @@
   			preload: function() {},
   			create: function (){
   							game.add.text(400, 300, 'Player 1 Wins', { fontSize: '32px', fill: '#FFF' });
-  						  player1Rounds += 1;
-                if(player1Rounds < 2){
+  						  player1.rounds += 1;
+                if(player1.rounds < 2){
                 game.time.events.add(Phaser.Timer.SECOND * 2, function() {game.state.start('fight')}, this);
                 }
               },
@@ -143,8 +142,8 @@
   	preload: function() {},
   	create: function (){
   					game.add.text(400, 300, 'Player 2 Wins', { fontSize: '32px', fill: '#FFF' });
-  				  player2Rounds += 1;
-            if(player2Rounds < 2) {
+  				  player2.rounds += 1;
+            if(player2.rounds < 2) {
                   game.time.events.add(Phaser.Timer.SECOND * 2, function() { game.state.start('fight')}, this);
             }
           },
