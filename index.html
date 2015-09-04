@@ -95,16 +95,18 @@
     player2.lifeBar = bars.create(550, 0, lifeBar, 0);
     player2.airBar = bars.create(550, 10, airBar, 0);
 
-    player1.hitBox = game.add.sprite(0, 0, "sword");
-    player2.hitBox = game.add.sprite(0, 0, "sword");
+    player1.hitBox = game.add.sprite(player1.sprite.body.width, player1.sprite.body.height / 2, "sword");
+    player2.hitBox = game.add.sprite(0, player2.sprite.body.height / 2, "sword");
 
     game.physics.enable(player1.hitBox, Phaser.Physics.ARCADE);
-    game.physics.enable(player2.hitBox, Phaser.Physics.ARCADE);;
+    game.physics.enable(player2.hitBox, Phaser.Physics.ARCADE);
+
+    player2.hitBox.rotation = 3.1415926536;
 
     player1.sprite.addChild(player1.hitBox);
     player2.sprite.addChild(player2.hitBox);
-    player1.hitBox.body.setSize(30, 10, player1.sprite.width, player1.sprite.height / 2);
-    player2.hitBox.body.setSize(30, 10, -31, player2.sprite.height / 2);
+    player1.hitBox.body.setSize(30, 10, player1.sprite.body.width, player1.sprite.body.height / 2);
+    player2.hitBox.body.setSize(30, 10, -31, player2.sprite.body.height / 2);
 
   }
 
