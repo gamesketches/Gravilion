@@ -12,6 +12,7 @@
                                               create: create, update: update});
 
   var boundaries, bars;
+  var swordDamage = 1;
   var player1 = { lifeBar: null, airBar: null, life: 100, air: 100, sprite: null,
                     rounds: 0, swordHitBox: null};
   var player2 = { lifeBar: null, airBar: null, life: 100, air: 100, sprite: null,
@@ -30,6 +31,9 @@
     if((keys.up.isDown && player.body.gravity.y > 0) ||
         (keys.down.isDown && player.body.gravity.y < 0)) {
       player.body.gravity.y *= -1;
+    }
+    if(keys.projectile.isDown){
+      console.log("projectile");
     }
   }
 
@@ -115,23 +119,25 @@
     game.physics.arcade.collide(player2.sprite, boundaries);
 
     var p2Controls = game.input.keyboard.createCursorKeys();
+    p2Controls.projectile = game.input.keyboard.addKey(Phaser.Keyboard.P);
 
     var p1Controls = {
       up: game.input.keyboard.addKey(Phaser.Keyboard.W),
       down: game.input.keyboard.addKey(Phaser.Keyboard.S),
       left: game.input.keyboard.addKey(Phaser.Keyboard.A),
       right: game.input.keyboard.addKey(Phaser.Keyboard.D),
+      projectile: game.input.keyboard.addKey(Phaser.Keyboard.Q),
     }
 
     processInput(player1.sprite, p1Controls);
     processInput(player2.sprite, p2Controls);
 
     player1.air -= 0.05;
-    if(player1.air < 0) {
+    if(player1.air < 0 || player1.life < 0) {
       game.state.start('p2Wins');
     }
     player2.air -= 0.05;
-    if(player2.air < 0) {
+    if(player2.air < 0 || player2.life < 0) {
       game.state.start('p1Wins');
     }
     player1.airBar.scale.set(player1.air / 100, 1);
@@ -139,6 +145,13 @@
 
     player1.lifeBar.scale.set(player1.life / 100, 1);
     player2.lifeBar.scale.set(player2.life / 100, 1);
+
+    if(Phaser.Rectangle.intersects(player1.hitBox.getBounds(), player2.sprite.getBounds())) {
+      player2.life -= swordDamage;
+    }
+    if(Phaser.Rectangle.intersects(player2.hitBox.getBounds(), player1.sprite.getBounds())) {
+      player1.life -= swordDamage;
+    }
   }
 
   game.state.add('fight', { preload: preload, create: create, update: update});
