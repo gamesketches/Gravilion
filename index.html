@@ -13,13 +13,14 @@
 
   var boundaries, bars, projectiles;
   var swordDamage = 2;
-  var projectileDamage = 1;
+  var projectileDamage = 1, projectileSpeed = 5;
+  var projectileCooldown = 15;
   var player1 = { lifeBar: null, airBar: null, life: 100, air: 100, sprite: null,
-                    rounds: 0, swordHitBox: null, facingRight: true};
+                    rounds: 0, swordHitBox: null, facingRight: true, gunHeat: 0};
   var player2 = { lifeBar: null, airBar: null, life: 100, air: 100, sprite: null,
-                    rounds: 0, swordHitBox: null, facingRight: false};
+                    rounds: 0, swordHitBox: null, facingRight: false, gunHeat: 0};
 
-  function processInput(player, keys) {
+  function processInput(player, keys, gunHeat) {
     player.body.velocity.x = 0;
 
     if(keys.left.isDown) {
@@ -35,15 +36,22 @@
         (keys.down.isDown && player.body.gravity.y < 0)) {
       player.body.gravity.y *= -1;
     }
-    if(keys.projectile.isDown){
+    if(keys.projectile.isDown && gunHeat <= 0){
       var projectileRect = game.make.bitmapData(100, 35);
       projectileRect.ctx.fillStyle = "#FF00FF";
       projectileRect.ctx.fillRect(0, 0, 100, 35);
 
-      var projectile = projectiles.create(player.body.x, player.body.y, projectileRect);
-      projectile.velocity = player.facingRight ? 5 : -5;
+      var projectile = player.facingRight ?
+                            projectiles.create(player.body.x + player.body.width, player.body.y, projectileRect) :
+                            projectiles.create(player.body.x, player.body.y, projectileRect);
+      projectile.velocity = player.facingRight ? projectileSpeed : -projectileSpeed;
+
+      return projectileCooldown;
 
     }
+
+    return gunHeat;
+
   }
 
   function preload() {
@@ -141,8 +149,8 @@
       projectile: game.input.keyboard.addKey(Phaser.Keyboard.Q),
     }
 
-    processInput(player1.sprite, p1Controls);
-    processInput(player2.sprite, p2Controls);
+    player1.gunHeat = processInput(player1.sprite, p1Controls, player1.gunHeat);
+    player2.gunHeat = processInput(player2.sprite, p2Controls, player2.gunHeat);
 
     player1.air -= 0.05;
     if(player1.air < 0 || player1.life < 0) {
@@ -174,7 +182,9 @@
           if(Phaser.Rectangle.intersects(player2.sprite.getBounds(), child.getBounds())){
             player2.life -= projectileDamage;
           }
-        })
+        });
+    player1.gunHeat -= 1;
+    player2.gunHeat -= 1;
   }
 
   game.state.add('fight', { preload: preload, create: create, update: update});
