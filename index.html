@@ -12,20 +12,23 @@
                                               create: create, update: update});
 
   var boundaries, bars, projectiles;
-  var swordDamage = 1;
+  var swordDamage = 2;
+  var projectileDamage = 1;
   var player1 = { lifeBar: null, airBar: null, life: 100, air: 100, sprite: null,
-                    rounds: 0, swordHitBox: null};
+                    rounds: 0, swordHitBox: null, facingRight: true};
   var player2 = { lifeBar: null, airBar: null, life: 100, air: 100, sprite: null,
-                    rounds: 0, swordHitBox: null};
+                    rounds: 0, swordHitBox: null, facingRight: false};
 
   function processInput(player, keys) {
     player.body.velocity.x = 0;
 
     if(keys.left.isDown) {
       player.body.velocity.x = -100;
+      player.facingRight = false;
     }
     else if(keys.right.isDown) {
       player.body.velocity.x = 100;
+      player.facingRight = true;
     }
 
     if((keys.up.isDown && player.body.gravity.y > 0) ||
@@ -38,7 +41,7 @@
       projectileRect.ctx.fillRect(0, 0, 100, 35);
 
       var projectile = projectiles.create(player.body.x, player.body.y, projectileRect);
-      projectile.velocity = 5;
+      projectile.velocity = player.facingRight ? 5 : -5;
 
     }
   }
@@ -165,6 +168,12 @@
     projectiles.forEach(
         function(child) {
           child.body.x += child.velocity;
+          if(Phaser.Rectangle.intersects(player1.sprite.getBounds(), child.getBounds())){
+            player1.life -= projectileDamage;
+          }
+          if(Phaser.Rectangle.intersects(player2.sprite.getBounds(), child.getBounds())){
+            player2.life -= projectileDamage;
+          }
         })
   }
 
