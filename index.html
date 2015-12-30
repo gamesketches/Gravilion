@@ -11,7 +11,7 @@
   var game = new Phaser.Game(800, 400, Phaser.AUTO, '', {preload: preload,
                                               create: create, update: update});
 
-  var boundaries, bars;
+  var boundaries, bars, projectiles;
   var swordDamage = 1;
   var player1 = { lifeBar: null, airBar: null, life: 100, air: 100, sprite: null,
                     rounds: 0, swordHitBox: null};
@@ -33,7 +33,13 @@
       player.body.gravity.y *= -1;
     }
     if(keys.projectile.isDown){
-      console.log("projectile");
+      var projectileRect = game.make.bitmapData(100, 35);
+      projectileRect.ctx.fillStyle = "#FF00FF";
+      projectileRect.ctx.fillRect(0, 0, 100, 35);
+
+      var projectile = projectiles.create(player.body.x, player.body.y, projectileRect);
+      projectile.velocity = 5;
+
     }
   }
 
@@ -112,6 +118,9 @@
     player1.hitBox.body.setSize(30, 10, player1.sprite.body.width, player1.sprite.body.height / 2);
     player2.hitBox.body.setSize(30, 10, -31, player2.sprite.body.height / 2);
 
+    projectiles = game.add.group();
+    projectiles.enableBody = true;
+
   }
 
   function update() {
@@ -152,6 +161,11 @@
     if(Phaser.Rectangle.intersects(player2.hitBox.getBounds(), player1.sprite.getBounds())) {
       player1.life -= swordDamage;
     }
+
+    projectiles.forEach(
+        function(child) {
+          child.body.x += child.velocity;
+        })
   }
 
   game.state.add('fight', { preload: preload, create: create, update: update});
