@@ -16,25 +16,30 @@
   var projectileDamage = 1, projectileSpeed = 5;
   var projectileCooldown = 15;
   var player1 = { lifeBar: null, airBar: null, life: 100, air: 100, sprite: null,
-                    rounds: 0, swordHitBox: null, facingRight: true, gunHeat: 0};
+                    rounds: 0, swordHitBox: null, facingRight: true, gunHeat: 0, gunAngle: 0,
+                    controls: null};
   var player2 = { lifeBar: null, airBar: null, life: 100, air: 100, sprite: null,
-                    rounds: 0, swordHitBox: null, facingRight: false, gunHeat: 0};
+                    rounds: 0, swordHitBox: null, facingRight: false, gunHeat: 0, gunAngle: 0,
+                    controls: null};
 
-  function processInput(player, keys, gunHeat) {
-    player.body.velocity.x = 0;
+  function processInput(player) {
+    var sprite = player.sprite;
+    var gunHeat = player.gunHeat;
+    var keys = player.controls;
+    sprite.body.velocity.x = 0;
 
     if(keys.left.isDown) {
-      player.body.velocity.x = -100;
+      sprite.body.velocity.x = -100;
       player.facingRight = false;
     }
     else if(keys.right.isDown) {
-      player.body.velocity.x = 100;
+      sprite.body.velocity.x = 100;
       player.facingRight = true;
     }
 
-    if((keys.up.isDown && player.body.gravity.y > 0) ||
-        (keys.down.isDown && player.body.gravity.y < 0)) {
-      player.body.gravity.y *= -1;
+    if((keys.up.isDown && sprite.body.gravity.y > 0) ||
+        (keys.down.isDown && sprite.body.gravity.y < 0)) {
+      sprite.body.gravity.y *= -1;
     }
     if(keys.projectile.isDown && gunHeat <= 0){
       var projectileRect = game.make.bitmapData(100, 35);
@@ -42,15 +47,15 @@
       projectileRect.ctx.fillRect(0, 0, 100, 35);
 
       var projectile = player.facingRight ?
-                            projectiles.create(player.body.x + player.body.width, player.body.y, projectileRect) :
-                            projectiles.create(player.body.x, player.body.y, projectileRect);
+                            projectiles.create(sprite.body.x + sprite.body.width, sprite.body.y, projectileRect) :
+                            projectiles.create(sprite.body.x, sprite.body.y, projectileRect);
       projectile.velocity = player.facingRight ? projectileSpeed : -projectileSpeed;
 
-      return projectileCooldown;
+      player.gunHeat = projectileCooldown;
 
     }
 
-    return gunHeat;
+    player.gunHeat = gunHeat;
 
   }
 
@@ -129,6 +134,17 @@
     player1.hitBox.body.setSize(30, 10, player1.sprite.body.width, player1.sprite.body.height / 2);
     player2.hitBox.body.setSize(30, 10, -31, player2.sprite.body.height / 2);
 
+    player2.controls = game.input.keyboard.createCursorKeys();
+    player2.controls.projectile = game.input.keyboard.addKey(Phaser.Keyboard.P);
+
+    player1.controls = {
+      up: game.input.keyboard.addKey(Phaser.Keyboard.W),
+      down: game.input.keyboard.addKey(Phaser.Keyboard.S),
+      left: game.input.keyboard.addKey(Phaser.Keyboard.A),
+      right: game.input.keyboard.addKey(Phaser.Keyboard.D),
+      projectile: game.input.keyboard.addKey(Phaser.Keyboard.Q),
+    };
+
     projectiles = game.add.group();
     projectiles.enableBody = true;
 
@@ -138,19 +154,8 @@
     game.physics.arcade.collide(player1.sprite, boundaries);
     game.physics.arcade.collide(player2.sprite, boundaries);
 
-    var p2Controls = game.input.keyboard.createCursorKeys();
-    p2Controls.projectile = game.input.keyboard.addKey(Phaser.Keyboard.P);
-
-    var p1Controls = {
-      up: game.input.keyboard.addKey(Phaser.Keyboard.W),
-      down: game.input.keyboard.addKey(Phaser.Keyboard.S),
-      left: game.input.keyboard.addKey(Phaser.Keyboard.A),
-      right: game.input.keyboard.addKey(Phaser.Keyboard.D),
-      projectile: game.input.keyboard.addKey(Phaser.Keyboard.Q),
-    }
-
-    player1.gunHeat = processInput(player1.sprite, p1Controls, player1.gunHeat);
-    player2.gunHeat = processInput(player2.sprite, p2Controls, player2.gunHeat);
+    processInput(player1);
+    processInput(player2);
 
     player1.air -= 0.05;
     if(player1.air < 0 || player1.life < 0) {
