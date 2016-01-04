@@ -41,7 +41,7 @@
         (keys.down.isDown && sprite.body.gravity.y < 0)) {
       sprite.body.gravity.y *= -1;
     }
-    if(keys.projectile.isDown && player.gunAngle > 0){
+    if(keys.projectile.isDown && player.gunAngle >= 0){
       player.gunAngle += angleChange;
     }
 
@@ -50,6 +50,7 @@
   function releaseShot(event) {
     if(event.keyCode == player1.controls.projectile.keyCode){
       fireShot(player1, player1.gunAngle);
+      console.log(player1.gunAngle);
       player1.gunAngle = -1;
     }
     else if(event.keyCode == player2.controls.projectile.keyCode){
@@ -60,16 +61,17 @@
 
   function chargeShot(event){
     if(event.keyCode == player1.controls.projectile.keyCode){
-      if(!player1.gunHeat)
+      if(player1.gunHeat <= 0)
         player1.gunAngle = 0;
     }
     else if(event.keyCode == player2.controls.projectile.keyCode){
-      if(!player2.gunHeat)
+      if(player2.gunHeat <= 0)
         player2.gunAngle = 0;
     }
   }
 
   function fireShot(player, angle) {
+    console.log(angle);
     var sprite = player.sprite;
     var projectileRect = game.make.bitmapData(100, 35);
     projectileRect.ctx.fillStyle = "#FF00FF";
@@ -78,7 +80,7 @@
     var projectile = player.facingRight ?
                           projectiles.create(sprite.body.x + sprite.body.width, sprite.body.y, projectileRect) :
                           projectiles.create(sprite.body.x, sprite.body.y, projectileRect);
-    var yVelocity = projectileSpeed * Math.sin(angle);
+    var yVelocity = projectileSpeed * -Math.sin(angle);
     var xVelocity = player.facingRight ? projectileSpeed - yVelocity :
                                                 -projectileSpeed + yVelocity;
 
