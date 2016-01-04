@@ -13,13 +13,13 @@
 
   var boundaries, bars, projectiles;
   var swordDamage = 2;
-  var projectileDamage = 1, projectileSpeed = 5;
+  var projectileDamage = 1, projectileSpeed = 5, angleChange = 0.2;
   var projectileCooldown = 15;
   var player1 = { lifeBar: null, airBar: null, life: 100, air: 100, sprite: null,
-                    rounds: 0, swordHitBox: null, facingRight: true, gunHeat: 0, gunAngle: 0,
+                    rounds: 0, swordHitBox: null, facingRight: true, gunHeat: 0, gunAngle: -1,
                     controls: null};
   var player2 = { lifeBar: null, airBar: null, life: 100, air: 100, sprite: null,
-                    rounds: 0, swordHitBox: null, facingRight: false, gunHeat: 0, gunAngle: 0,
+                    rounds: 0, swordHitBox: null, facingRight: false, gunHeat: 0, gunAngle: -1,
                     controls: null};
 
   function processInput(player) {
@@ -41,22 +41,46 @@
         (keys.down.isDown && sprite.body.gravity.y < 0)) {
       sprite.body.gravity.y *= -1;
     }
-    if(keys.projectile.isDown && gunHeat <= 0){
-      var projectileRect = game.make.bitmapData(100, 35);
-      projectileRect.ctx.fillStyle = "#FF00FF";
-      projectileRect.ctx.fillRect(0, 0, 100, 35);
-
-      var projectile = player.facingRight ?
-                            projectiles.create(sprite.body.x + sprite.body.width, sprite.body.y, projectileRect) :
-                            projectiles.create(sprite.body.x, sprite.body.y, projectileRect);
-      projectile.velocity = player.facingRight ? projectileSpeed : -projectileSpeed;
-
-      player.gunHeat = projectileCooldown;
-
+    if(keys.projectile.isDown && player.gunAngle > 0){
+      player.gunAngle += angleChange;
     }
 
-    player.gunHeat = gunHeat;
+  }
 
+  function releaseShot(event) {
+    if(event.keyCode == player1.controls.projectile.keyCode){
+      player1.gunAngle = -1;
+      fireShot(player1);
+    }
+    else if(event.keyCode == player2.controls.projectile.keyCode){
+      player2.gunAngle = -1;
+      fireShot(player2);
+    }
+  }
+
+  function chargeShot(event){
+    if(event.keyCode == player1.controls.projectile.keyCode){
+      if(!player1.gunHeat)
+        player1.gunAngle = 0;
+    }
+    else if(event.keyCode == player2.controls.projectile.keyCode){
+      if(!player2.gunHeat)
+        player2.gunAngle = 0;
+    }
+  }
+
+  function fireShot(player) {
+    var sprite = player.sprite;
+    var projectileRect = game.make.bitmapData(100, 35);
+    projectileRect.ctx.fillStyle = "#FF00FF";
+    projectileRect.ctx.fillRect(0, 0, 100, 35);
+
+    var projectile = player.facingRight ?
+                          projectiles.create(sprite.body.x + sprite.body.width, sprite.body.y, projectileRect) :
+                          projectiles.create(sprite.body.x, sprite.body.y, projectileRect);
+    projectile.velocity = player.facingRight ? projectileSpeed : -projectileSpeed;
+
+    player.gunHeat = projectileCooldown;
   }
 
   function preload() {
@@ -144,6 +168,8 @@
       right: game.input.keyboard.addKey(Phaser.Keyboard.D),
       projectile: game.input.keyboard.addKey(Phaser.Keyboard.Q),
     };
+
+    game.input.keyboard.addCallbacks(this, chargeShot, releaseShot, null);
 
     projectiles = game.add.group();
     projectiles.enableBody = true;
