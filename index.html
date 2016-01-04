@@ -13,7 +13,7 @@
 
   var boundaries, bars, projectiles;
   var swordDamage = 2;
-  var projectileDamage = 1, projectileSpeed = 5, angleChange = 0.2;
+  var projectileDamage = 1, projectileSpeed = 5, angleChange = 0.01;
   var projectileCooldown = 15;
   var player1 = { lifeBar: null, airBar: null, life: 100, air: 100, sprite: null,
                     rounds: 0, swordHitBox: null, facingRight: true, gunHeat: 0, gunAngle: -1,
@@ -49,12 +49,12 @@
 
   function releaseShot(event) {
     if(event.keyCode == player1.controls.projectile.keyCode){
+      fireShot(player1, player1.gunAngle);
       player1.gunAngle = -1;
-      fireShot(player1);
     }
     else if(event.keyCode == player2.controls.projectile.keyCode){
+      fireShot(player2, player2.gunAngle);
       player2.gunAngle = -1;
-      fireShot(player2);
     }
   }
 
@@ -69,7 +69,7 @@
     }
   }
 
-  function fireShot(player) {
+  function fireShot(player, angle) {
     var sprite = player.sprite;
     var projectileRect = game.make.bitmapData(100, 35);
     projectileRect.ctx.fillStyle = "#FF00FF";
@@ -78,8 +78,11 @@
     var projectile = player.facingRight ?
                           projectiles.create(sprite.body.x + sprite.body.width, sprite.body.y, projectileRect) :
                           projectiles.create(sprite.body.x, sprite.body.y, projectileRect);
-    projectile.velocity = player.facingRight ? projectileSpeed : -projectileSpeed;
+    var yVelocity = projectileSpeed * Math.sin(angle);
+    var xVelocity = player.facingRight ? projectileSpeed - yVelocity :
+                                                -projectileSpeed + yVelocity;
 
+    projectile.velocity = {x: xVelocity, y: yVelocity};
     player.gunHeat = projectileCooldown;
   }
 
@@ -206,7 +209,8 @@
 
     projectiles.forEach(
         function(child) {
-          child.body.x += child.velocity;
+          child.body.x += child.velocity.x;
+          child.body.y += child.velocity.y;
           if(Phaser.Rectangle.intersects(player1.sprite.getBounds(), child.getBounds())){
             player1.life -= projectileDamage;
           }
