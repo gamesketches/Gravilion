@@ -31,21 +31,35 @@
     if(keys.left.isDown) {
       sprite.body.velocity.x = -100;
       player.facingRight = false;
+      sprite.scale.x = -1;
+      player.hitBox.x = player.sprite.anchor.x + (player.sprite.body.width);
+      player.hitBox.scale.x = -1;
+      console.log(player.sprite.anchor.x - (player.sprite.body.width / 2))
     }
     else if(keys.right.isDown) {
       sprite.body.velocity.x = 100;
       player.facingRight = true;
+      sprite.scale.x = 1;
+      player.hitBox.x = player.sprite.anchor.x + player.sprite.body.width / 2;
+      player.hitBox.scale.x = 1;
     }
 
     if((keys.up.isDown && sprite.body.gravity.y > 0) ||
         (keys.down.isDown && sprite.body.gravity.y < 0)) {
       sprite.body.gravity.y *= -1;
+      sprite.scale.y *= -1;
     }
     if(keys.projectile.isDown && player.gunAngle >= 0){
       player.gunAngle += angleChange;
       if(player.gunAngle > 90){
         player.gunAngle = 90;
       }
+    }
+    if(keys.sword.isDown) {
+      player.hitBox.revive();
+    }
+    else{
+      player.hitBox.kill();
     }
 
   }
@@ -130,10 +144,6 @@
     var right = boundaries.create(790, 30, horBoundaries, 0);
     right.body.immovable = true;
 
-    /*var playerRect = game.make.bitmapData(40, 110);
-    playerRect.ctx.fillStyle = "#00FF00";
-    playerRect.ctx.fillRect(0, 0, 35, 150);
-*/
     player1.sprite = game.add.sprite(40, 240, "astronaut");
     player1.sprite.anchor.setTo(.5,.5);
     game.physics.arcade.enable(player1.sprite);
@@ -164,8 +174,10 @@
     player2.airBar = bars.create(550, 10, airBar, 0);
 
     player1.hitBox = game.add.sprite(player1.sprite.anchor.x + player1.sprite.body.width / 2, player1.sprite.anchor.y, "sword");
+    player1.hitBox.anchor.setTo(0.5,0.5);
     player2.hitBox = game.add.sprite(player2.sprite.anchor.x - player2.sprite.body.width / 2, player2.sprite.anchor.y, "sword");
     player2.hitBox.scale.x *= -1;
+    player2.hitBox.anchor.setTo(0.5,0.5);
 
     game.physics.enable(player1.hitBox, Phaser.Physics.ARCADE);
     game.physics.enable(player2.hitBox, Phaser.Physics.ARCADE);
@@ -176,9 +188,12 @@
     player2.sprite.addChild(player2.hitBox);
     player1.hitBox.body.setSize(30, 10, player1.sprite.body.width, player1.sprite.body.height / 2);
     player2.hitBox.body.setSize(30, 10, -31, player2.sprite.body.height / 2);
+    player1.hitBox.kill();
+    player2.hitBox.kill();
 
     player2.controls = game.input.keyboard.createCursorKeys();
     player2.controls.projectile = game.input.keyboard.addKey(Phaser.Keyboard.P);
+    player2.controls.sword = game.input.keyboard.addKey(Phaser.Keyboard.O);
 
     player1.controls = {
       up: game.input.keyboard.addKey(Phaser.Keyboard.W),
@@ -186,6 +201,7 @@
       left: game.input.keyboard.addKey(Phaser.Keyboard.A),
       right: game.input.keyboard.addKey(Phaser.Keyboard.D),
       projectile: game.input.keyboard.addKey(Phaser.Keyboard.Q),
+      sword: game.input.keyboard.addKey(Phaser.Keyboard.E),
     };
 
     game.input.keyboard.addCallbacks(this, chargeShot, releaseShot, null);
@@ -216,10 +232,10 @@
     player1.lifeBar.scale.set(player1.life / 100, 1);
     player2.lifeBar.scale.set(player2.life / 100, 1);
 
-    if(Phaser.Rectangle.intersects(player1.hitBox.getBounds(), player2.sprite.getBounds())) {
+    if(player1.hitBox.alive && Phaser.Rectangle.intersects(player1.hitBox.getBounds(), player2.sprite.getBounds())) {
       player2.life -= swordDamage;
     }
-    if(Phaser.Rectangle.intersects(player2.hitBox.getBounds(), player1.sprite.getBounds())) {
+    if(player2.hitBox.alive && Phaser.Rectangle.intersects(player2.hitBox.getBounds(), player1.sprite.getBounds())) {
       player1.life -= swordDamage;
     }
 
