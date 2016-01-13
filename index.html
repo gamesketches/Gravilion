@@ -91,13 +91,15 @@
   function fireShot(player, angle) {
     console.log(angle);
     var sprite = player.sprite;
-    var projectileRect = game.make.bitmapData(100, 35);
-    projectileRect.ctx.fillStyle = "#FF00FF";
-    projectileRect.ctx.fillRect(0, 0, 100, 35);
+    //var projectileRect = game.make.bitmapData(100, 35);
+    //projectileRect.ctx.fillStyle = "#FF00FF";
+    //projectileRect.ctx.fillRect(0, 0, 100, 35);
 
     var projectile = player.facingRight ?
-                          projectiles.create(sprite.body.x + sprite.body.width, sprite.body.y, projectileRect) :
-                          projectiles.create(sprite.body.x, sprite.body.y, projectileRect);
+                          projectiles.create(sprite.body.x + sprite.body.width, sprite.body.y, "projectile") :
+                          projectiles.create(sprite.body.x, sprite.body.y, "projectile");
+    projectile.scale.x = player.sprite.scale.x;
+    projectile.angle = -angle;
     var yVelocity = projectileSpeed * Math.sin(angle * Math.PI / 180);
     var xVelocity = projectileSpeed - yVelocity;
     if(sprite.body.gravity.y > 0) {
@@ -116,7 +118,8 @@
     player1.air = 100;
     player2.air = 100;
     game.load.image('sword', 'sword.png');
-    game.load.image('astronaut', 'astronautSprite.png')
+    game.load.image('astronaut', 'astronautSprite.png');
+    game.load.image('projectile', 'projectile.png');
   }
 
   function create() {
