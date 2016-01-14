@@ -34,7 +34,7 @@
       sprite.scale.x = -1;
       player.hitBox.x = player.sprite.anchor.x + (player.sprite.body.width);
       player.hitBox.scale.x = -1;
-      console.log(player.sprite.anchor.x - (player.sprite.body.width / 2))
+      player.sprite.animations.play("walk", 8, true);
     }
     else if(keys.right.isDown) {
       sprite.body.velocity.x = 100;
@@ -42,6 +42,10 @@
       sprite.scale.x = 1;
       player.hitBox.x = player.sprite.anchor.x + player.sprite.body.width / 2;
       player.hitBox.scale.x = 1;
+      player.sprite.animations.play("walk", 8, true);
+    }
+    else {
+      player.sprite.animations.play("stand", 5, true);
     }
 
     if((keys.up.isDown && sprite.body.gravity.y > 0) ||
@@ -120,7 +124,7 @@
     player1.air = 100;
     player2.air = 100;
     game.load.image('sword', 'sword.png');
-    game.load.image('astronaut', 'astronautSprite.png');
+    game.load.spritesheet('astronautWalking', 'astronautWalkingAnimation.png', 50, 88, 5);
     game.load.image('projectile', 'projectile.png');
   }
 
@@ -149,19 +153,23 @@
     var right = boundaries.create(790, 30, horBoundaries, 0);
     right.body.immovable = true;
 
-    player1.sprite = game.add.sprite(40, 240, "astronaut");
+    player1.sprite = game.add.sprite(40, 240, "astronautWalking");
     player1.sprite.anchor.setTo(.5,.5);
     game.physics.arcade.enable(player1.sprite);
     player1.sprite.body.bounce.y = 0.2;
     player1.sprite.body.gravity.y = 300;
+    player1.sprite.animations.add("walk", [0,1,2,3]);
+    player1.sprite.animations.add("stand", [4]);
 
-    player2.sprite = game.add.sprite(600, 130, "astronaut");
+    player2.sprite = game.add.sprite(600, 130, "astronautWalking");
     player2.sprite.anchor.setTo(.5,.5);
     player2.sprite.scale.x *= -1;
     player2.sprite.scale.y *= -1;
     game.physics.arcade.enable(player2.sprite);
     player2.sprite.body.bounce.y = 0.2;
     player2.sprite.body.gravity.y = -300;
+    player2.sprite.animations.add("walk", [0,1,2,3]);
+    player2.sprite.animations.add("stand", [4]);
 
     var lifeBar = game.make.bitmapData(200, 10);
     lifeBar.ctx.fillStyle = "#d2b48c";
