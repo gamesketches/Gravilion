@@ -17,12 +17,12 @@
   var projectileCooldown = 15;
   var player1 = { lifeBar: null, airBar: null, life: 100, air: 100, sprite: null,
                     rounds: 0, swordHitBox: null, facingRight: true, gunHeat: 0, gunAngle: -1,
-                    controls: null};
+                    controls: null, jumpingSprite: null};
   var player2 = { lifeBar: null, airBar: null, life: 100, air: 100, sprite: null,
                     rounds: 0, swordHitBox: null, facingRight: false, gunHeat: 0, gunAngle: -1,
-                    controls: null};
+                    controls: null, jumpingSprite: null};
 
-  function processInput(player) {
+  function processInput(player, grounded) {
     var sprite = player.sprite;
     var gunHeat = player.gunHeat;
     var keys = player.controls;
@@ -60,10 +60,19 @@
       }
     }
     if(keys.sword.isDown) {
-      player.hitBox.revive();
+      if(!game.physics.arcade.collide(sprite, boundaries)){
+        player.jumpingSprite.visible = true;
+        //player.sprite.visible = false;
+        console.log("should be spinning");
+      }
+      else {
+        player.hitBox.revive();
+      }
     }
     else{
       player.hitBox.kill();
+      player.sprite.visible = true;
+      player.jumpingSprite.visible = false;
     }
 
   }
@@ -125,6 +134,7 @@
     player2.air = 100;
     game.load.image('sword', 'sword.png');
     game.load.spritesheet('astronautWalking', 'astronautWalkingAnimation.png', 50, 88, 5);
+    game.load.image('spinningAstronaut', 'spinningAstronaut.png');
     game.load.image('projectile', 'projectile.png');
   }
 
@@ -153,23 +163,28 @@
     var right = boundaries.create(790, 30, horBoundaries, 0);
     right.body.immovable = true;
 
-    player1.sprite = game.add.sprite(40, 240, "astronautWalking");
-    player1.sprite.anchor.setTo(.5,.5);
-    game.physics.arcade.enable(player1.sprite);
-    player1.sprite.body.bounce.y = 0.2;
-    player1.sprite.body.gravity.y = 300;
-    player1.sprite.animations.add("walk", [0,1,2,3]);
-    player1.sprite.animations.add("stand", [4]);
-
-    player2.sprite = game.add.sprite(600, 130, "astronautWalking");
-    player2.sprite.anchor.setTo(.5,.5);
-    player2.sprite.scale.x *= -1;
-    player2.sprite.scale.y *= -1;
-    game.physics.arcade.enable(player2.sprite);
-    player2.sprite.body.bounce.y = 0.2;
-    player2.sprite.body.gravity.y = -300;
-    player2.sprite.animations.add("walk", [0,1,2,3]);
-    player2.sprite.animations.add("stand", [4]);
+    var makePlayer = function(startX, startY, scale, player) {
+      player.sprite = game.add.sprite(startX, startY, "astronautWalking");
+      player.sprite.anchor.setTo(0.5,0.5);
+      game.physics.arcade.enable(player.sprite);
+      player.sprite.scale.x *= scale;
+      player.sprite.scale.y *= scale;
+      player.sprite.body.bounce.y = 0.2;
+      player.sprite.body.gravity.y = 300 * scale;
+      player.sprite.animations.add("walk", [0,1,2,3]);
+      player.sprite.animations.add("stand", [4]);
+      player.jumpingSprite = game.add.sprite(-player.sprite.body.width / 2, -player.sprite.body.height / 2, "spinningAstronaut");
+      //game.physics.arcade.enable(player.jumpingSprite);
+      player.sprite.addChild(player.jumpingSprite);
+      //player.jumpingSprite.visible = false;
+      //player.jumpingSprite.body.gravity.y = player.sprite.body.gravity.y;
+      player.hitBox = game.add.sprite(player.sprite.anchor.x + (player.sprite.body.width / 2) * scale, player.sprite.anchor.y, "sword");
+      player.hitBox.anchor.setTo(0.5, 0.5);
+      player.hitBox.scale.x *= scale;
+      game.physics.enable(player.hitBox, Phaser.Physics.ARCADE);
+    }
+    makePlayer(40, 240, 1, player1);
+    makePlayer(600, 130, -1, player2);
 
     var lifeBar = game.make.bitmapData(200, 10);
     lifeBar.ctx.fillStyle = "#d2b48c";
@@ -185,15 +200,6 @@
     player1.airBar = bars.create(10, 10, airBar, 0);
     player2.lifeBar = bars.create(550, 0, lifeBar, 0);
     player2.airBar = bars.create(550, 10, airBar, 0);
-
-    player1.hitBox = game.add.sprite(player1.sprite.anchor.x + player1.sprite.body.width / 2, player1.sprite.anchor.y, "sword");
-    player1.hitBox.anchor.setTo(0.5,0.5);
-    player2.hitBox = game.add.sprite(player2.sprite.anchor.x - player2.sprite.body.width / 2, player2.sprite.anchor.y, "sword");
-    player2.hitBox.scale.x *= -1;
-    player2.hitBox.anchor.setTo(0.5,0.5);
-
-    game.physics.enable(player1.hitBox, Phaser.Physics.ARCADE);
-    game.physics.enable(player2.hitBox, Phaser.Physics.ARCADE);
 
     player2.hitBox.rotation = 3.1415926536;
 
@@ -225,11 +231,12 @@
   }
 
   function update() {
-    game.physics.arcade.collide(player1.sprite, boundaries);
-    game.physics.arcade.collide(player2.sprite, boundaries);
+    var p1Grounded = game.physics.arcade.collide(player1.sprite, boundaries);
+    var p2Grounded = game.physics.arcade.collide(player2.sprite, boundaries);
 
-    processInput(player1);
-    processInput(player2);
+    console.log("p1Grounded: ", p1Grounded);
+    processInput(player1, p1Grounded);
+    processInput(player2, p2Grounded);
 
     player1.air -= 0.05;
     if(player1.air < 0 || player1.life < 0) {
