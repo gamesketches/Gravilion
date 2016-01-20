@@ -22,65 +22,6 @@
                     rounds: 0, swordHitBox: null, facingRight: false, gunHeat: 0, gunAngle: -1,
                     controls: null, jumpingSprite: null};
 
-  function processInput(player, grounded) {
-    var sprite = player.sprite;
-    var gunHeat = player.gunHeat;
-    var keys = player.controls;
-    sprite.body.velocity.x = 0;
-    player.jumpingSprite.position = player.sprite.position;
-
-    if(keys.left.isDown) {
-      sprite.body.velocity.x = -100;
-      player.facingRight = false;
-      sprite.scale.x = -1;
-      player.hitBox.x = player.sprite.anchor.x + (player.sprite.body.width);
-      player.hitBox.scale.x = -1;
-      player.sprite.animations.play("walk", 8, true);
-    }
-    else if(keys.right.isDown) {
-      sprite.body.velocity.x = 100;
-      player.facingRight = true;
-      sprite.scale.x = 1;
-      player.hitBox.x = player.sprite.anchor.x + player.sprite.body.width / 2;
-      player.hitBox.scale.x = 1;
-      player.sprite.animations.play("walk", 8, true);
-    }
-    else {
-      player.sprite.animations.play("stand", 5, true);
-    }
-
-    if((keys.up.isDown && sprite.body.gravity.y > 0) ||
-        (keys.down.isDown && sprite.body.gravity.y < 0)) {
-      sprite.body.gravity.y *= -1;
-      sprite.scale.y *= -1;
-    }
-    if(keys.projectile.isDown && player.gunAngle >= 0){
-      player.gunAngle += angleChange;
-      if(player.gunAngle > 90){
-        player.gunAngle = 90;
-      }
-    }
-    if(keys.sword.isDown) {
-      if(!grounded){
-        player.jumpingSprite.visible = true;
-        player.jumpingSprite.rotation += 1;
-        player.sprite.renderable = false;
-        player.air -= 0.1;
-      }
-      else {
-        player.hitBox.revive();
-        player.jumpingSprite.visible = false;
-        player.sprite.renderable = true;
-      }
-    }
-    else{
-      player.hitBox.kill();
-      player.sprite.renderable = true;
-      player.jumpingSprite.visible = false;
-    }
-
-  }
-
   function releaseShot(event) {
     if(event.keyCode == player1.controls.projectile.keyCode){
       fireShot(player1, player1.gunAngle);
@@ -179,10 +120,6 @@
       player.sprite.animations.add("stand", [4]);
       player.jumpingSprite = game.add.sprite(-player.sprite.body.width / 2, -player.sprite.body.height / 2, "spinningAstronaut");
       player.jumpingSprite.anchor.setTo(0.5, 0.5);
-      //game.physics.arcade.enable(player.jumpingSprite);
-      //player.sprite.addChild(player.jumpingSprite);
-      //player.jumpingSprite.visible = false;
-      //player.jumpingSprite.body.gravity.y = player.sprite.body.gravity.y;
       player.hitBox = game.add.sprite(player.sprite.anchor.x + (player.sprite.body.width / 2) * scale, player.sprite.anchor.y, "sword");
       player.hitBox.anchor.setTo(0.5, 0.5);
       player.hitBox.scale.x *= scale;
@@ -239,7 +176,6 @@
     var p1Grounded = game.physics.arcade.collide(player1.sprite, boundaries);
     var p2Grounded = game.physics.arcade.collide(player2.sprite, boundaries);
 
-    console.log("p1Grounded: ", p1Grounded);
     processInput(player1, p1Grounded);
     processInput(player2, p2Grounded);
 
@@ -257,8 +193,11 @@
     player1.lifeBar.scale.set(player1.life / 100, 1);
     player2.lifeBar.scale.set(player2.life / 100, 1);
 
-    processCollisions(player1.hitBox, player1.jumpingSprite, player2);
-    processCollisions(player2.hitBox, player2.jumpingSprite, player1);
+    if (processCollisions(player1.hitBox, player1.jumpingSprite, player2) ||
+    processCollisions(player2.hitBox, player2.jumpingSprite, player1)) {
+      player1.sprite.body.velocity.x += player1.facingRight ? -300 : 300;
+      player2.sprite.body.velocity.x += player2.facingRight ? -300 : 300;
+    }
 
     projectiles.forEach(
         function(child) {
@@ -275,6 +214,65 @@
     player2.gunHeat -= 1;
   }
 
+  function processInput(player, grounded) {
+    var sprite = player.sprite;
+    var gunHeat = player.gunHeat;
+    var keys = player.controls;
+    sprite.body.velocity.x = 0;
+    player.jumpingSprite.position = player.sprite.position;
+
+    if(keys.left.isDown) {
+      sprite.body.velocity.x = -100;
+      player.facingRight = false;
+      sprite.scale.x = -1;
+      player.hitBox.x = player.sprite.anchor.x + (player.sprite.body.width);
+      player.hitBox.scale.x = -1;
+      player.sprite.animations.play("walk", 8, true);
+    }
+    else if(keys.right.isDown) {
+      sprite.body.velocity.x = 100;
+      player.facingRight = true;
+      sprite.scale.x = 1;
+      player.hitBox.x = player.sprite.anchor.x + player.sprite.body.width / 2;
+      player.hitBox.scale.x = 1;
+      player.sprite.animations.play("walk", 8, true);
+    }
+    else {
+      player.sprite.animations.play("stand", 5, true);
+    }
+
+    if((keys.up.isDown && sprite.body.gravity.y > 0) ||
+        (keys.down.isDown && sprite.body.gravity.y < 0)) {
+      sprite.body.gravity.y *= -1;
+      sprite.scale.y *= -1;
+    }
+    if(keys.projectile.isDown && player.gunAngle >= 0){
+      player.gunAngle += angleChange;
+      if(player.gunAngle > 90){
+        player.gunAngle = 90;
+      }
+    }
+    if(keys.sword.isDown) {
+      if(!grounded){
+        player.jumpingSprite.visible = true;
+        player.jumpingSprite.rotation += 1;
+        player.sprite.renderable = false;
+        player.air -= 0.1;
+      }
+      else {
+        player.hitBox.revive();
+        player.jumpingSprite.visible = false;
+        player.sprite.renderable = true;
+      }
+    }
+    else{
+      player.hitBox.kill();
+      player.sprite.renderable = true;
+      player.jumpingSprite.visible = false;
+    }
+
+  }
+
   function processCollisions(playerSlash, playerSpin, opposingPlayer) {
     if(!playerSlash.alive && !playerSpin.visible) {
       return
@@ -285,11 +283,16 @@
     var eval = function(attack, hurtBox) {
         if(Phaser.Rectangle.intersects(attack, hurtBox)) {
           opposingPlayer.life -= swordDamage
+          return true;
           }
       };
 
-      eval(playerSlash.alive ? playerSlash.getBounds() : tempHitBox, hurtBox);
-    eval(playerSpin.visible ? playerSlash.getBounds() : tempHitBox, hurtBox);
+    if(eval(playerSlash.alive ? playerSlash.getBounds() : tempHitBox, hurtBox)){
+      return true;
+    }
+    if(eval(playerSpin.visible ? playerSpin.getBounds() : tempHitBox, hurtBox)) {
+      return true;
+    }
 
   }
 
