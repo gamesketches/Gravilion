@@ -23,12 +23,12 @@
                     controls: null, jumpingSprite: null};
 
   function releaseShot(event) {
-    if(event.keyCode == player1.controls.projectile.keyCode){
+    if(event.keyCode == player1.controls.projectile.keyCode && player1.gunAngle >= 0){
       fireShot(player1, player1.gunAngle);
       console.log("Shot Fired");
       player1.gunAngle = -1;
     }
-    else if(event.keyCode == player2.controls.projectile.keyCode){
+    else if(event.keyCode == player2.controls.projectile.keyCode && player2.gunAngle >= 0){
       fireShot(player2, player2.gunAngle);
       player2.gunAngle = -1;
     }
@@ -204,10 +204,10 @@
           child.body.x += child.velocity.x;
           child.body.y += child.velocity.y;
           if(Phaser.Rectangle.intersects(player1.sprite.getBounds(), child.getBounds())){
-            player1.life -= projectileDamage;
+            player1.life -= player1.jumpingSprite.visible ? 0 : projectileDamage;
           }
           if(Phaser.Rectangle.intersects(player2.sprite.getBounds(), child.getBounds())){
-            player2.life -= projectileDamage;
+            player2.life -= player2.jumpingSprite.visible ? 0 : projectileDamage;
           }
         });
     player1.gunHeat -= 1;
