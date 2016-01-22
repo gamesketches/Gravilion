@@ -12,7 +12,7 @@
                                               create: create, update: update});
 
   var boundaries, bars, projectiles, tempVar;
-  var swordDamage = 2;
+  var swordDamage = 4, knockBack = 400;
   var projectileDamage = 1, projectileSpeed = 5, angleChange = 1;
   var projectileCooldown = 15;
   var player1 = { lifeBar: null, airBar: null, life: 100, air: 100, sprite: null,
@@ -161,8 +161,8 @@
       down: game.input.keyboard.addKey(Phaser.Keyboard.S),
       left: game.input.keyboard.addKey(Phaser.Keyboard.A),
       right: game.input.keyboard.addKey(Phaser.Keyboard.D),
-      projectile: game.input.keyboard.addKey(Phaser.Keyboard.Q),
-      sword: game.input.keyboard.addKey(Phaser.Keyboard.E),
+      projectile: game.input.keyboard.addKey(Phaser.Keyboard.G),
+      sword: game.input.keyboard.addKey(Phaser.Keyboard.H),
     };
 
     game.input.keyboard.addCallbacks(this, chargeShot, releaseShot, null);
@@ -193,10 +193,13 @@
     player1.lifeBar.scale.set(player1.life / 100, 1);
     player2.lifeBar.scale.set(player2.life / 100, 1);
 
-    if (processCollisions(player1.hitBox, player1.jumpingSprite, player2) ||
-    processCollisions(player2.hitBox, player2.jumpingSprite, player1)) {
-      player1.sprite.body.velocity.x += player1.facingRight ? -300 : 300;
-      player2.sprite.body.velocity.x += player2.facingRight ? -300 : 300;
+    var player2Hit = processCollisions(player1.hitBox, player1.jumpingSprite, player2);
+    var player1Hit = processCollisions(player2.hitBox, player2.jumpingSprite, player1);
+    if(player1Hit || player2Hit){
+    //if (processCollisions(player1.hitBox, player1.jumpingSprite, player2) ||
+    //processCollisions(player2.hitBox, player2.jumpingSprite, player1)) {
+      player1.sprite.body.velocity.x += player1.facingRight ? -knockBack : knockBack;
+      player2.sprite.body.velocity.x += player2.facingRight ? -knockBack : knockBack;
     }
 
     projectiles.forEach(
@@ -302,7 +305,7 @@
   			preload: function() {},
   			create: function (){
   							game.add.text(400, 300, 'Player 1 Wins', { fontSize: '32px', fill: '#FFF' });
-  						  player1.rounds += 1;
+  						  //player1.rounds += 1;
                 if(player1.rounds < 2){
                 game.time.events.add(Phaser.Timer.SECOND * 2, function() {game.state.start('fight')}, this);
                 }
@@ -313,7 +316,7 @@
   	preload: function() {},
   	create: function (){
   					game.add.text(400, 300, 'Player 2 Wins', { fontSize: '32px', fill: '#FFF' });
-  				  player2.rounds += 1;
+  				//  player2.rounds += 1;
             if(player2.rounds < 2) {
                   game.time.events.add(Phaser.Timer.SECOND * 2, function() { game.state.start('fight')}, this);
             }
